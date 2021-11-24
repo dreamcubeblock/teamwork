@@ -1,0 +1,4 @@
+2021-11-22 12:57:04,477-web.py[lineno:60]-INFO-动态资源请求地址:/index.html
+2021-11-22 12:57:04,548-web.py[lineno:96]-INFO-静态资源请求地址:/css/main.css
+2021-11-22 12:57:04,553-web.py[lineno:96]-INFO-静态资源请求地址:/js/index.js
+2021-11-22 12:57:04,596-web.py[lineno:96]-INFO-静态资源请求地址:/favicon.ico
