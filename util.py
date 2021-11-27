@@ -15,7 +15,7 @@ def importwords(path):
     return english,chinese
 
 import pymysql
-def myInsert(username,english,chinese,book,zerolist):
+def myInsert(userid,english,chinese,book,zerolist):
 
    db = pymysql.connect(host="localhost",user="root",password="28853379", database="group6")#
  
@@ -24,45 +24,73 @@ def myInsert(username,english,chinese,book,zerolist):
 #   try:
 
 
-   sql = "INSERT INTO %s.word(english, chinese,book,state) VALUES(%s,%s,%s,%s);".format(username)
+   sql = "INSERT INTO group6.word(english, chinese,book) VALUES(%s,%s,%s);"
+   
    val=[]
    for i in range(0,len(english)):
-       val.append([english[i],chinese[i],list[i],zerolist[i]])
+       val.append([english[i],chinese[i],list[i]])
 
    cursor.executemany(sql,val)
-
+   for i in range(0,len(english)):
+    sql="insert into group6.user_"+str(userid)+"(status) values(%s);"
+   #print(zerolist)
+  # print(type(zerolist[0]))
+   #zerolist=tuple(zerolist)
+    cursor.execute(sql,['0'])
    db.commit()
+def createusertable(userid):
+    db = pymysql.connect(host="localhost",user="root",password="28853379", database="group6")
+    cursor=db.cursor()
+    sql="create table group6.user_"+str(userid)+"(wordid int auto_increment primary key,status char(10));"
+   # print(sql)
+    cursor.execute(sql)
+ #    db = pymysql.connect(host="localhost",user="root",password="28853379", database="group6")#
+ #    sql="insert into group6.user-%s(status) values(%s);".format(userid)
+ #    cursor.execute(sql,zerolist)
+  #   db.commit()
       # print("finishe!")
    #except BaseException:
 
     #  print('------faile!', word_name)
     #  db.rollback()
-def createtable(username):
+
+def createtable(userid):
     db = pymysql.connect(host="localhost",user="root",password="28853379", database="group6")
     cursor=db.cursor()
-    sql="create table %s.word(create table group6.word(english char(50),chinese char(100),book char(50),state char(5));".format(username)
+    sql="create table group6.word(wordid int not null auto_increment primary key,english char(50),chinese char(100),book char(50));"
+    #sql="create table group6.user-%s(wordid int identitiy,status char(10));".format(userid)
     cursor.execute(sql)
     db.commit()
-def updatetable(username,word,state):
+def updatetable(userid,id,state):
     db = pymysql.connect(host="localhost",user="root",password="28853379", database="group6")
     cursor=db.cursor()
     if state:
-        sql="update %s.word set state=1 where english=word;".format(username)
-        cursor.excute(sql)
+        sql="update group6.user_"+str(userid)+" set status='1' where wordid="+str(id)+";"
+        #print(sql)
+        cursor.execute(sql)
         db.commit()
 
-def getanswer(username,word):
-    db = pymysql.connect(host="localhost",user="root",password="28853379", database=username)
+def getanswer(word):
+    db = pymysql.connect(host="localhost",user="root",password="28853379", database="group6")
     cursor=db.cursor()
-    sql=" select  top  3  chinese  from  %s.word  order  by  newid() where english!=word;".format(username)
-    cursor.excute(sql)
+    sql=" select  chinese  from  group6.word where wordid!="+"'"+word+"'"+" order by rand() limit 3;"
+    cursor.execute(sql)
     #db.commit()
     results=cursor.fetchall()
-    sql="select chinese from %s.word where english=word;".format(username)
-    cursor.excute(sql)
+    sql="select chinese from group6.word where english="+"'"+word+"'"+";"
+    print(sql)
+    cursor.execute(sql)
     rightanswer=cursor.fetchall()
     return rightanswer,results
-
+def getquestion(userid,number):
+    db = pymysql.connect(host="localhost",user="root",password="28853379", database="group6")
+    cursor=db.cursor()
+    sql=" select wordid,english from group6.word where wordid in(select wordid from group6.user_"+str(userid)+" where status='0') order by rand() limit "+str(number)+";"
+    #print(sql)
+    cursor.execute(sql)
+    #db.commit()
+    results=cursor.fetchall()
+    return results
 if __name__=='__main__':
     path='/home/四级单词表.txt'
     english,chinese=importwords(path)
@@ -74,8 +102,16 @@ if __name__=='__main__':
     zerolist=[]
     for i in range(0,length):
         list.append(name)
-        zerolist.append(0)
+        zerolist.append([str(0)])
 
-    print(type(zerolist[0]))
+    #print(type(zerolist[0]))
+    #createtable(2)
+    #createusertable(2)
+    #myInsert(2,english,chinese,list,zerolist)
+    #words=getquestion(2,50)
+    #print(words)
+  #  right,wrong=getanswer("abandon")
+ #   print(right)
+#    print(wrong)
+#:    updatetable(2,4501,True)
 
-    myInsert(english,chinese,list,zerolist)
